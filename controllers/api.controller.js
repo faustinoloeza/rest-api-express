@@ -14,24 +14,16 @@ const getApi = (req, res = response) => {
 
 const postApi = async (req = request, res = response) => {
   try {
-    const myUser = { name, mail, password, image, role, state, google } = req.body;
+    const  {...myuser } = req.body;
 
-    const isValidRole = await Role.findOne({ role: myUser.role });
-    const isValidMail = await User.findOne({ mail: myUser.mail });
-    if (isValidMail) {
-      return res.status(400).json({"error": "Mail is duplicated"});
-    }
-    console.table(isValidRole);
-    if (!isValidRole) {
-      return res.status(400).json({"error": "Role is not valid"});
-    } 
-
-    //validations(req, res, next, myUser);
-    const user = new User(myUser);
-    const hash = bcrypt.hashSync(password, saltRounds);
+    const user = new User(myuser);
+    console.log(user);
+    const hash = bcrypt.hashSync(myuser.password, saltRounds);
     user.password = hash;
+
+    console.log(user);
     await user.save();
-    let p = bcrypt.compareSync(password, hash);
+
     res.json({
       message: 'User created',
       user: user,
@@ -44,7 +36,41 @@ const postApi = async (req = request, res = response) => {
   }
 }
 
+const putApi = async (req = request, res = response) => {
+  try {
+    const { id } = req.params;
+    const { _id, password, google, ...parametros } = req.body;
+    const userU = await User.findByIdAndUpdate(id, parametros);
 
+    res.json({
+      message: 'User updated',
+      user: userU,
+  });
+  } catch (error) {
+    res.json({
+      message: 'Error',
+      error: error
+    });
+  }
+}
+const getUsers = async (req = request, res = response) => {
+  let {limit, skip} = req.query;
+  try {
+    const userU = await User.find().skip(skip).limit(limit);
+    const total = await User.countDocuments();
+    res.json({
+      message: 'User get',
+      users: userU,
+      total: total
+
+  });
+  } catch (error) {
+    res.json({
+      message: 'Error',
+      error: error
+    });
+  }
+}
 const profile =  (req, res, next) =>{
   console.log(req.body)
   res.json(req.body)
@@ -53,6 +79,8 @@ const profile =  (req, res, next) =>{
 module.exports = {
   getApi,
   postApi,
-  profile
+  profile,
+  putApi,
+  getUsers
 };
 //floeza 9068Zair

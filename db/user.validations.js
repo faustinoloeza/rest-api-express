@@ -15,6 +15,23 @@ let validations = async(res, req, next, myUser) => {
 
 }
 
+const isEmailValid = async(email = '') => {
+    const isValidMail = await User.findOne({ mail: email });
+    if (isValidMail) {
+     throw new Error('Mail is duplicated');
+    }
+    return true;
+}
+const isValidRole = async(role = '') => {
+  const isValidRole = await Role.findOne({ role: role });
+  if (!isValidRole) {
+   throw new Error('Role is incorrect');
+  }
+  return true;
+}
+
 module.exports = {
-    validations
+    validations,
+    isEmailValid,
+    isValidRole
 }
